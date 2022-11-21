@@ -1,7 +1,10 @@
 # directories
 node_modules/
+.github
 
 # files
 .env
 .eslintrc.json
 package-lock.json
+chumbaka.credentials.json
+cf.credentials.json

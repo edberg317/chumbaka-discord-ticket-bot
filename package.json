@@ -1,4 +1,7 @@
 {
+  "engines": {
+    "node": ">=16.6.0"
+  },
   "name": "chumbaka-discord-ticket-bot",
   "version": "1.0.0",
   "description": "",
