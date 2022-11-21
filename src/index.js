@@ -78,8 +78,9 @@ class Bot extends Client {
 				client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
 				private_key: process.env.GOOGLE_PRIVATE_KEY,
 			});
-			await this.db.sync();
 			*/
+
+			await this.db.sync();
 
 			console.log('Connecting to Discord API...');
 
