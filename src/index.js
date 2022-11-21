@@ -70,11 +70,16 @@ class Bot extends Client {
 
 			// Google Spreadsheet DB connection
 			this.db = new SheetDatabase(this.config.sheetId);
+			const creds = require('./app-credentials.json');
+			await this.db.useServiceAccount(creds);
+
+			/*
 			await this.db.useServiceAccount({
 				client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
 				private_key: process.env.GOOGLE_PRIVATE_KEY,
 			});
 			await this.db.sync();
+			*/
 
 			console.log('Connecting to Discord API...');
 
