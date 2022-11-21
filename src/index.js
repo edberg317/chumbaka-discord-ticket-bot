@@ -83,7 +83,7 @@ class Bot extends Client {
 
 			console.log('Connecting to Discord API...');
 
-			this.login();
+			this.login(process.env.DISCORD_TOKEN);
 		})();
 	}
 }
