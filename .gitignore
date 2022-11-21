@@ -6,5 +6,5 @@ node_modules/
 .env
 .eslintrc.json
 package-lock.json
-chumbaka.credentials.json
+app-credentials.json
 cf.credentials.json
