@@ -70,7 +70,7 @@ class Bot extends Client {
 
 			// Google Spreadsheet DB connection
 			this.db = new SheetDatabase(this.config.sheetId);
-			const creds = require('./app-credentials.json');
+			const creds = require('../app-credentials.json');
 			await this.db.useServiceAccount(creds);
 
 			/*
