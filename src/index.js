@@ -90,3 +90,6 @@ class Bot extends Client {
 }
 
 new Bot();
+
+const keepAlive = require('./server');
+keepAlive();

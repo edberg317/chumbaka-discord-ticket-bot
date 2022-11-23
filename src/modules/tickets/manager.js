@@ -54,7 +54,7 @@ module.exports = class TicketManager extends EventEmitter {
 		const guild = this.client.guilds.cache.get(guild_id);
 		const creator = await guild.members.fetch(creator_id);
 		const name = settings.name_format
-			.replace(/{+\s?(user)?name\s?}+/gi, creator.nickname)
+			.replace(/{+\s?(user)?name\s?}+/gi, creator.displayName)
 			.replace(/{+\s?num(ber)?\s?}+/gi, number);
 
 		const t_channel = await guild.channels.create(name, {
@@ -81,7 +81,7 @@ module.exports = class TicketManager extends EventEmitter {
 			}
 
 			const description = settings.opening_message
-				.replace(/{+\s?(user)?name\s?}+/gi, creator.nickname)
+				.replace(/{+\s?(user)?name\s?}+/gi, creator.displayName)
 				.replace(/{+\s?(tag|ping|mention)?\s?}+/gi, creator.user.toString()) + ticket_info_embed;
 			const embed = new MessageEmbed()
 				.setColor(settings.colour)
@@ -247,7 +247,7 @@ module.exports = class TicketManager extends EventEmitter {
 			}
 
 			const channel_name = settings.name_format
-				.replace(/{+\s?(user)?name\s?}+/gi, creator.nickname)
+				.replace(/{+\s?(user)?name\s?}+/gi, creator.displayName)
 				.replace(/{+\s?num(ber)?\s?}+/gi, ticket.number);
 
 			const attachment = new MessageAttachment(Buffer.from(lines.join('\n')), channel_name + '.txt');

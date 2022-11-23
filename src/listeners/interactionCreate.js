@@ -603,7 +603,7 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				}
 
 				const description = settings.opening_message
-					.replace(/{+\s?(user)?name\s?}+/gi, creator.nickname)
+					.replace(/{+\s?(user)?name\s?}+/gi, creator.displayName)
 					.replace(/{+\s?(tag|ping|mention)?\s?}+/gi, creator.user.toString()) + ticket_info_embed;
 
 				const opening_message = await interaction.channel.messages.fetch(t_row.pinned_message);
