@@ -346,14 +346,6 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 
 				return;
 			}
-
-			else if (interaction.customId.startsWith('chumbaka.public.wiki')) {
-				await interaction.reply({
-					content: 'Chumbaka Public Wiki is opened in a new tab.',
-					ephemeral: true,
-				});
-				return require('open')('https://www.notion.so/chumbaka/Chumbaka-Public-Wiki-211dd84b04a5487e83a86e647f162cdc');
-			}
 		}
 
 		else if (interaction.isSelectMenu()) {
@@ -639,9 +631,9 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 					await helpfulResources_message.edit({
 						components: [new MessageActionRow()
 							.addComponents(new MessageButton()
-								.setCustomId('chumbaka.public.wiki')
 								.setLabel('More Resources')
-								.setStyle('PRIMARY'),
+								.setStyle('LINK')
+								.setURL(settings.chumbaka_public_wiki),
 							),
 						],
 						embeds: [
@@ -657,9 +649,9 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 					await helpfulResources_message.edit({
 						components: [new MessageActionRow()
 							.addComponents(new MessageButton()
-								.setCustomId('chumbaka.public.wiki')
 								.setLabel('Visit Now')
-								.setStyle('PRIMARY'),
+								.setStyle('LINK')
+								.setURL(settings.chumbaka_public_wiki),
 							),
 						],
 						embeds: [

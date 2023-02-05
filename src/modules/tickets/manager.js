@@ -179,9 +179,9 @@ module.exports = class TicketManager extends EventEmitter {
 				sentHelpfulResources = await t_channel.send({
 					components: [new MessageActionRow()
 						.addComponents(new MessageButton()
-							.setCustomId('chumbaka.public.wiki')
 							.setLabel('More Resources')
-							.setStyle('PRIMARY'),
+							.setStyle('LINK')
+							.setURL(settings.chumbaka_public_wiki),
 						),
 					],
 					embeds: [new MessageEmbed()
@@ -196,9 +196,9 @@ module.exports = class TicketManager extends EventEmitter {
 				sentHelpfulResources = await t_channel.send({
 					components: [new MessageActionRow()
 						.addComponents(new MessageButton()
-							.setCustomId('chumbaka.public.wiki')
 							.setLabel('Visit Now')
-							.setStyle('PRIMARY'),
+							.setStyle('LINK')
+							.setURL(settings.chumbaka_public_wiki),
 						),
 					],
 					embeds: [new MessageEmbed()
