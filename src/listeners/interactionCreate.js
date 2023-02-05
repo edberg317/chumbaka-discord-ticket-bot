@@ -11,7 +11,7 @@ const {
 	MessageSelectMenu,
 } = require('discord.js');
 
-const { findOne, findAndCountAll, chunkArray } = require('../utils');
+const { findOne, findAndCountAll, chunkArray, searchNotionDatabase } = require('../utils');
 const wait = require('node:timers/promises').setTimeout;
 
 module.exports = class InteractionCreateEventListener extends EventListener {
@@ -346,6 +346,14 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 
 				return;
 			}
+
+			else if (interaction.customId.startsWith('chumbaka.public.wiki')) {
+				await interaction.reply({
+					content: 'Chumbaka Public Wiki is opened in a new tab.',
+					ephemeral: true,
+				});
+				return require('open')('https://www.notion.so/chumbaka/Chumbaka-Public-Wiki-211dd84b04a5487e83a86e647f162cdc');
+			}
 		}
 
 		else if (interaction.isSelectMenu()) {
@@ -597,9 +605,11 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				const creator = await interaction.guild.members.fetch(t_row.creator_id);
 
 				let ticket_info_embed = '';
+				let keywords = '';
 
 				for (const question of questionsArray) {
 					ticket_info_embed += `\n\`${question[0]}\` : ${ticket_info[questionsArray.indexOf(question)]}`;
+					keywords = keywords + ' ' + ticket_info[questionsArray.indexOf(question)];
 				}
 
 				const description = settings.opening_message
@@ -621,6 +631,47 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				await interaction.deferReply({
 					ephemeral: true,
 				});
+
+				// Send some helpful resources
+				const helpfulResources_message = await interaction.channel.messages.fetch(t_row.helpful_resources);
+				const helpfulResources = await searchNotionDatabase(keywords);
+				if (helpfulResources_message && helpfulResources) {
+					await helpfulResources_message.edit({
+						components: [new MessageActionRow()
+							.addComponents(new MessageButton()
+								.setCustomId('chumbaka.public.wiki')
+								.setLabel('More Resources')
+								.setStyle('PRIMARY'),
+							),
+						],
+						embeds: [
+							new MessageEmbed()
+								.setColor(settings.colour)
+								.setTitle('Chumbaka Public Wiki')
+								.setDescription('Please have a look at the resources below while waiting for assistance.\n\n' + helpfulResources)
+								.setFooter(settings.footer, interaction.guild.iconURL()),
+						],
+					});
+				}
+				else if (helpfulResources_message && !helpfulResources) {
+					await helpfulResources_message.edit({
+						components: [new MessageActionRow()
+							.addComponents(new MessageButton()
+								.setCustomId('chumbaka.public.wiki')
+								.setLabel('Visit Now')
+								.setStyle('PRIMARY'),
+							),
+						],
+						embeds: [
+							new MessageEmbed()
+								.setColor(settings.colour)
+								.setTitle('Chumbaka Public Wiki')
+								.setDescription('Please visit Chumbaka Public Wiki while waiting for assistance.\n\n')
+								.setFooter(settings.footer, interaction.guild.iconURL()),
+						],
+					});
+
+				}
 
 				await wait(this.client.config.wait);
 				await this.client.db.sync();

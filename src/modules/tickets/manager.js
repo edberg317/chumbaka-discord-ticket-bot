@@ -10,7 +10,7 @@ const {
 	MessageAttachment,
 } = require('discord.js');
 
-const { findOne, chunkArray } = require('../../utils');
+const { findOne, chunkArray, searchNotionDatabase } = require('../../utils');
 const wait = require('node:timers/promises').setTimeout;
 
 /** Manages tickets */
@@ -76,8 +76,10 @@ module.exports = class TicketManager extends EventEmitter {
 
 			const questionsArray = chunkArray(cat_row.opening_questions.replace(/\n/gi, '').split(','), cat_row.opening_questions.split(',').length / 3);
 
+			let keywords = '';
 			for (const question of questionsArray) {
 				ticket_info_embed += `\n\`${question[0]}\` : ${ticket_info[questionsArray.indexOf(question)]}`;
+				keywords = keywords + ' ' + ticket_info[questionsArray.indexOf(question)];
 			}
 
 			const description = settings.opening_message
@@ -125,15 +127,6 @@ module.exports = class TicketManager extends EventEmitter {
 				content: this.client.log.ticket.opening_message.content.replace(/{creator}/gi, creator.user.toString()),
 				embeds: [embed],
 			});
-			await sent.pin({ reason: 'Ticket opening message' });
-
-			const pinned = await t_channel.messages.cache.last();
-
-			if (pinned.system) {
-				await pinned
-					.delete({ reason: 'Cleaning up system message' })
-					.catch(() => console.warn('Failed to delete system pin message'));
-			}
 
 			let thread_link;
 			if (threadChannelId) {
@@ -179,6 +172,60 @@ module.exports = class TicketManager extends EventEmitter {
 				}
 			}
 
+			// Send some helpful resources
+			const helpfulResources = await searchNotionDatabase(keywords);
+			let sentHelpfulResources;
+			if (helpfulResources) {
+				sentHelpfulResources = await t_channel.send({
+					components: [new MessageActionRow()
+						.addComponents(new MessageButton()
+							.setCustomId('chumbaka.public.wiki')
+							.setLabel('More Resources')
+							.setStyle('PRIMARY'),
+						),
+					],
+					embeds: [new MessageEmbed()
+						.setColor(settings.colour)
+						.setTitle('Chumbaka Public Wiki')
+						.setDescription('Please have a look at the resources below while waiting for assistance.\n\n' + helpfulResources)
+						.setFooter(settings.footer, guild.iconURL()),
+					],
+				});
+			}
+			else {
+				sentHelpfulResources = await t_channel.send({
+					components: [new MessageActionRow()
+						.addComponents(new MessageButton()
+							.setCustomId('chumbaka.public.wiki')
+							.setLabel('Visit Now')
+							.setStyle('PRIMARY'),
+						),
+					],
+					embeds: [new MessageEmbed()
+						.setColor(settings.colour)
+						.setTitle('Chumbaka Public Wiki')
+						.setDescription('Please visit Chumbaka Public Wiki while waiting for assistance.\n\n')
+						.setFooter(settings.footer, guild.iconURL()),
+					],
+				});
+			}
+
+			await sentHelpfulResources.pin({ reason: 'Chumbaka Public Wiki' });
+			const pinnedSentHelpfulResources = await t_channel.messages.cache.last();
+			if (pinnedSentHelpfulResources.system) {
+				await pinnedSentHelpfulResources
+					.delete({ reason: 'Cleaning up system message' })
+					.catch(() => console.warn('Failed to delete system pin message'));
+			}
+
+			await sent.pin({ reason: 'Ticket opening message' });
+			const pinned = await t_channel.messages.cache.last();
+			if (pinned.system) {
+				await pinned
+					.delete({ reason: 'Cleaning up system message' })
+					.catch(() => console.warn('Failed to delete system pin message'));
+			}
+
 			await this.client.db.tickets.insertOne({
 				category_id: category_id,
 				ticket_id: t_channel.id,
@@ -188,6 +235,7 @@ module.exports = class TicketManager extends EventEmitter {
 				status: 'open',
 				opening_questions_answers: JSON.stringify(ticket_info),
 				pinned_message: sent.id,
+				helpful_resources: sentHelpfulResources ? sentHelpfulResources.id : '',
 				created_at: new Date().toLocaleString(),
 				ticket_link: `https://discord.com/channels/${settings.guild_id}/${t_channel.id}`,
 				thread_id: threadChannelId || null,
