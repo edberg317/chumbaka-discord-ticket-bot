@@ -23,7 +23,7 @@ module.exports = class ReadyEventListener extends EventListener {
 			setInterval(() => {
 				const presence = selectPresence();
 				this.client.user.setPresence(presence);
-				console.log(`Updated presence: ${presence.activities[0].type} ${presence.activities[0].name}`);
+				// console.log(`Updated presence: ${presence.activities[0].type} ${presence.activities[0].name}`);
 			}, this.client.config.presence.duration * 1000);
 		}
 
