@@ -627,7 +627,8 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				// Send some helpful resources
 				const helpfulResources_message = await interaction.channel.messages.fetch(t_row.helpful_resources);
 				const helpfulResources = await searchNotionDatabase(keywords);
-				if (helpfulResources_message && helpfulResources) {
+
+				if (t_row.helpful_resources && helpfulResources) {
 					await helpfulResources_message.edit({
 						components: [new MessageActionRow()
 							.addComponents(new MessageButton()
@@ -645,7 +646,7 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 						],
 					});
 				}
-				else if (helpfulResources_message && !helpfulResources) {
+				else if (t_row.helpful_resources && !helpfulResources) {
 					await helpfulResources_message.edit({
 						components: [new MessageActionRow()
 							.addComponents(new MessageButton()
