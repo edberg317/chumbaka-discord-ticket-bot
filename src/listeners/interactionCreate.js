@@ -149,16 +149,15 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 
 				console.log(`${interaction.user.tag} has claimed "${interaction.channel.name}" in "${interaction.guild.name}"`);
 
-				await this.client.db.tickets.updateRowsWhere(
-					(currentData) => (currentData.ticket_id === interaction.channel.id),
-					() => ({ claimer_id: interaction.user.id, claimer_user_tag: interaction.user.tag, status: 'in progress' }));
-
 				await interaction.deferReply({
 					ephemeral: true,
 				});
 
+				await this.client.db.tickets.updateRowsWhere(
+					(currentData) => (currentData.ticket_id === interaction.channel.id),
+					() => ({ claimer_id: interaction.user.id, claimer_user_tag: interaction.user.tag, status: 'in progress' }));
+
 				await wait(this.client.config.wait);
-				await this.client.db.sync();
 
 				await interaction.editReply({
 					embeds: [
@@ -211,16 +210,15 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 
 				console.log(`${interaction.user.tag} has released "${interaction.channel.name}" in "${interaction.guild.name}"`);
 
-				await this.client.db.tickets.updateRowsWhere(
-					(currentData) => (currentData.ticket_id === interaction.channel.id),
-					() => ({ claimer_id: '', claimer_user_tag: '', status: 'open' }));
-
 				await interaction.deferReply({
 					ephemeral: true,
 				});
 
+				await this.client.db.tickets.updateRowsWhere(
+					(currentData) => (currentData.ticket_id === interaction.channel.id),
+					() => ({ claimer_id: '', claimer_user_tag: '', status: 'open' }));
+
 				await wait(this.client.config.wait);
-				await this.client.db.sync();
 
 				await interaction.editReply({
 					embeds: [
@@ -575,6 +573,10 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 			}
 			else if (interaction.customId.startsWith('update.a.ticket')) {
 				// This is not a Ticket Category Id, this is a Ticket Id
+				await interaction.deferReply({
+					ephemeral: true,
+				});
+
 				const ticket_id = interaction.customId.slice(15);
 				const t_row = findOne({ 'ticket_id': ticket_id }, await this.client.db.tickets.getData());
 				const category_id = t_row.category_id;
@@ -593,6 +595,8 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 				await this.client.db.tickets.updateRowsWhere(
 					(currentData) => (currentData.ticket_id === ticket_id),
 					() => ({ opening_questions_answers: JSON.stringify(ticket_info) }));
+
+				await wait(this.client.config.wait);
 
 				const creator = await interaction.guild.members.fetch(t_row.creator_id);
 
@@ -618,10 +622,6 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 							.setDescription(description)
 							.setFooter(settings.footer, interaction.guild.iconURL()),
 					],
-				});
-
-				await interaction.deferReply({
-					ephemeral: true,
 				});
 
 				// Send some helpful resources
@@ -664,9 +664,6 @@ module.exports = class InteractionCreateEventListener extends EventListener {
 					});
 
 				}
-
-				await wait(this.client.config.wait);
-				await this.client.db.sync();
 
 				await interaction.editReply({
 					embeds: [
