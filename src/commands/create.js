@@ -64,18 +64,17 @@ module.exports = class CreateCommand extends Command {
 			type: 'GUILD_CATEGORY',
 		});
 
+		await interaction.deferReply({
+			ephemeral: true,
+		});
+
 		await this.client.db.categories.insertOne({
 			'category_id': cat_channel.id,
 			'category_name': name,
 			'roles_id': roles.toString(),
 		});
 
-		await interaction.deferReply({
-			ephemeral: true,
-		});
-
 		await wait(this.client.config.wait);
-		await this.client.db.sync();
 
 		return await interaction.editReply({
 			embeds: [
