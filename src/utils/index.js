@@ -90,6 +90,15 @@ module.exports = {
 		// Search all the pages and database that connected with the Notion Integration
 		const results = await notion.search();
 
+		// Review the notion results
+		/*
+		const fs = require('fs');
+		fs.writeFile('output.txt', JSON.stringify(results), function(err) {
+			if (err) throw err;
+			console.log('Result saved to file!');
+		});
+		*/
+
 		// Return if there's no results found
 		if (!results) {
 			return false;
@@ -108,14 +117,22 @@ module.exports = {
 		// (...properties.Tags.multi_select is a list of objects)
 		const allTags = [];
 		databaseResults.some(result => {
-			result.properties.Tags.multi_select.some(tag => {
-				allTags.push(tag.name);
-			});
+			if (result.properties.Tags) {
+				result.properties.Tags.multi_select.some(tag => {
+					allTags.push(tag.name);
+				});
+			}
 		});
 		const uniqueTags = allTags.filter((item, index, self) => self.indexOf(item) === index);
 
 		// Get all the searchTerm in lowercase (the searchTerm will be used to match with Tags)
-		const searchTerm = keywords.split(' ').map(keyword => keyword.toLowerCase());
+		const searchTerm = keywords
+			.replace(/[^a-zA-Z]+/g, ' ')
+			.toLowerCase().split(' ')
+			.filter(element => {
+				// Only keep elements that are not empty strings or contain only whitespace characters
+				return (typeof element === 'string' && element.trim() !== '') || typeof element !== 'string';
+			});
 
 		// Get all the matchTags (searchTerm intersect with allTags)
 		const matchTags = uniqueTags.filter(x => searchTerm.includes(x));
@@ -131,9 +148,11 @@ module.exports = {
 		combinations.some(combination => {
 			databaseResults.some(result => {
 				const tags = [];
-				result.properties.Tags.multi_select.some(tag => {
-					tags.push(tag.name);
-				});
+				if (result.properties.Tags) {
+					result.properties.Tags.multi_select.some(tag => {
+						tags.push(tag.name);
+					});
+				}
 				if (combination.every((item) => tags.includes(item)) && !matchResults.includes(result)) {
 					matchResults.push(result);
 				}
