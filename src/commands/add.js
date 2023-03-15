@@ -34,7 +34,7 @@ module.exports = class AddCommand extends Command {
 	 */
 	async execute(interaction) {
 		const settings = await this.client.db.config.getRow(0);
-		const channel = interaction.channel;
+		const channel = interaction.options.getChannel(this.client.botReply.commands.add.options.ticket.name) ?? interaction.channel;
 		const t_row = findOne({ 'ticket_id': interaction.channel.id }, await this.client.db.tickets.getData());
 
 		if (!t_row) {
