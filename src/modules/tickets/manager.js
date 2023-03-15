@@ -71,7 +71,7 @@ module.exports = class TicketManager extends EventEmitter {
 			VIEW_CHANNEL: true,
 		}, `Ticket channel created by ${creator.user.tag}`);
 
-		(async () => {
+		const create = async () => {
 			let ticket_info_embed = '';
 
 			const questionsArray = chunkArray(cat_row.opening_questions.replace(/\n/gi, '').split(','), cat_row.opening_questions.split(',').length / 3);
@@ -242,13 +242,13 @@ module.exports = class TicketManager extends EventEmitter {
 				thread_link: thread_link || null,
 			});
 
-		})();
+			await wait(this.client.config.wait);
+
+		};
+
+		await create();
 
 		console.log(`${creator.user.tag} created a new ticket in "${guild.name}"`);
-
-		await wait(this.client.config.wait);
-		await this.client.db.sync();
-
 		const t_row = findOne({ 'number': number }, await this.client.db.tickets.getData());
 		return t_row;
 	}
@@ -344,6 +344,8 @@ module.exports = class TicketManager extends EventEmitter {
 					closed_at: new Date().toLocaleString(),
 				}));
 
+			await wait(this.client.config.wait);
+
 			const closer = await guild.members.fetch(closer_id);
 
 			const description = this.client.log.ticket.closed_by_member.description.replace(/{user}/, closer.user.toString());
@@ -371,8 +373,6 @@ module.exports = class TicketManager extends EventEmitter {
 
 		if (channel) {
 			await close();
-			await wait(this.client.config.wait);
-			await this.client.db.sync();
 		}
 	}
 };
