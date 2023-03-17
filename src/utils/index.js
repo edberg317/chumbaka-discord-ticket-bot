@@ -87,8 +87,22 @@ module.exports = {
 
 	searchNotionDatabase: async (keywords) => {
 
+		async function searchDatabase() {
+			let results = [];
+			let hasMore = true;
+			let cursor = undefined;
+			while (hasMore) {
+				const response = await notion.search({ start_cursor: cursor });
+				results = [...results, ...response.results];
+				hasMore = response.has_more;
+				cursor = response.next_cursor;
+			}
+			return results;
+		}
+
 		// Search all the pages and database that connected with the Notion Integration
-		const results = await notion.search();
+		// const results = await notion.search();
+		const results = await searchDatabase();
 
 		// Review the notion results
 		/*
@@ -106,7 +120,7 @@ module.exports = {
 
 		// Get all the database results only (results.results is a list of objects)
 		const databaseResults = [];
-		results.results.some(result => {
+		results.some(result => {
 			if (result.parent.type === 'database_id') {
 				databaseResults.push(result);
 			}
